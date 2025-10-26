@@ -6,6 +6,8 @@ defaults:
   - ppo_trainer
   - _self_
 
+dataset_name: rog_both
+
 actor_rollout_ref:
   rollout:
     mode: async
