@@ -1,4 +1,4 @@
 [submodule "verl"]
 	path = verl
-	url = https://github.com/Y-Sui/tool-gfm-verl
+	url = https://github.com/Y-Sui/tool-gfm-verl.git
 	branch = main
