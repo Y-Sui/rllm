@@ -117,12 +117,16 @@ class ToolEnvironment(BaseEnv):
         threads = []
 
         def execute_tool(tool_call):
-            tool_name = tool_call["function"]["name"]
-            tool_args = json.loads(tool_call["function"]["arguments"])
-            tool_output = self.tools(tool_name=tool_name, **tool_args)
-            tool_output_str = tool_output.to_string()
-
-            output_queue.put((tool_call["id"], tool_output_str))
+            try:
+                tool_name = tool_call["function"]["name"]
+                tool_args = json.loads(tool_call["function"]["arguments"])
+                tool_output = self.tools(tool_name=tool_name, **tool_args)
+                tool_output_str = tool_output.to_string()
+                output_queue.put((tool_call["id"], tool_output_str))
+            except Exception as e:
+                # Handle tool execution errors gracefully to prevent thread hangs
+                error_msg = f"Tool execution error for '{tool_call.get('function', {}).get('name', 'unknown')}': {str(e)}"
+                output_queue.put((tool_call["id"], error_msg))
 
         # Create and start a thread for each tool call
         for idx, tool_call in enumerate(tool_calls):

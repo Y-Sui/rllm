@@ -247,7 +247,13 @@ class AgentExecutionEngine:
             start_time = time.time()
 
             try:
-                next_observation, reward, done, info = await asyncio.wait_for(loop.run_in_executor(self.executor, env.step, action), timeout=(self.trajectory_timeout - total_time))
+                # Ensure minimum timeout for env.step to prevent premature timeouts
+                # This is especially important for tool calls that require HTTP requests
+                remaining_timeout = max(10.0, self.trajectory_timeout - total_time)
+                next_observation, reward, done, info = await asyncio.wait_for(
+                    loop.run_in_executor(self.executor, env.step, action),
+                    timeout=remaining_timeout
+                )
             except asyncio.TimeoutError:
                 termination_reason = "ENV_TIMEOUT"
                 if step_idx == 0:
